@@ -43,7 +43,7 @@ namespace cAlgo
             if (bars.Count > standardDeviationSampleNumber +1)
             {
                 var candlesStandardDeviation = GetCandlesStandardDeviation(standardDeviationSampleNumber);
-                Debug.WriteLine($"ZR: candlesStandardDeviation {candlesStandardDeviation.ToString()}");
+                Debug.WriteLine($"ZR: candlesStandardDeviation {candlesStandardDeviation.sd.ToString()}  ---- mean {candlesStandardDeviation.mean.ToString()}");
             }
 
 
@@ -88,15 +88,16 @@ namespace cAlgo
         }
 
 
-        private double GetCandlesStandardDeviation(int countCandles)
+        private (double sd, double mean) GetCandlesStandardDeviation(int countCandles)
         {
             {
                 var deltaHighLowOfCandles = GetDeltaHighLowOfCandles(countCandles);
 
 
-                var resp = SampleStandardDeviation(deltaHighLowOfCandles);
+                var resp_sd = SampleStandardDeviation(deltaHighLowOfCandles);
+                var resp_mean = deltaHighLowOfCandles.Average();
 
-                return resp;
+                return (resp_sd, resp_mean);
             }
 
             List<double> GetDeltaHighLowOfCandles(int numberOfCandles)
