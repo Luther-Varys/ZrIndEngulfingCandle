@@ -43,7 +43,17 @@ namespace cAlgo
             if (bars.Count > standardDeviationSampleNumber +1)
             {
                 var candlesStandardDeviation = GetCandlesStandardDeviation(standardDeviationSampleNumber);
-                Debug.WriteLine($"ZR: candlesStandardDeviation {candlesStandardDeviation.sd.ToString()}  ---- mean {candlesStandardDeviation.mean.ToString()}");
+                var sdLastCandle = GetStandardDeviationIfLastCandle(barLast, candlesStandardDeviation.sd, candlesStandardDeviation.mean);
+                Debug.WriteLine($"ZR: {barLast.OpenTime.ToString()} smallsigma SD: {candlesStandardDeviation.sd.ToString()}  ---- mean: {candlesStandardDeviation.mean.ToString()} --- sdLastCandle: {sdLastCandle}");
+
+                double GetStandardDeviationIfLastCandle(Bar barLast, double standardDevaition, double mean)
+                {
+                    var deltasHighLowLastCandle = Math.Abs(barLast.High - barLast.Low);
+
+                    var resp = (mean - deltasHighLowLastCandle) / standardDevaition;
+
+                    return resp;
+                }
             }
 
 
