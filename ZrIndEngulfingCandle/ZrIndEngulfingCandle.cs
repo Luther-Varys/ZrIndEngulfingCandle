@@ -27,7 +27,7 @@ namespace cAlgo
             Print(Message);
         }
 
-        int standardDeviationSampleNumber = 10;
+        int standardDeviationSampleNumber = 20;
         double tollerancePercent = 0;
         double bodyPercentVsWick = 200;
         public override void Calculate(int index)
@@ -40,17 +40,21 @@ namespace cAlgo
             var barPreLast = bars.TakeLast(3).First();
             var barLast = bars.TakeLast(2).First();
 
+            //if (bars.Count > standardDeviationSampleNumber +1 && barLast.OpenTime == new DateTime(2024, 4, 19, 3, 0, 0))
             if (bars.Count > standardDeviationSampleNumber +1)
-            {
+                {
                 var candlesStandardDeviation = GetCandlesStandardDeviation(standardDeviationSampleNumber);
                 var sdLastCandle = GetStandardDeviationIfLastCandle(barLast, candlesStandardDeviation.sd, candlesStandardDeviation.mean);
-                Debug.WriteLine($"ZR: {barLast.OpenTime.ToString()} smallsigma SD: {candlesStandardDeviation.sd.ToString()}  ---- mean: {candlesStandardDeviation.mean.ToString()} --- sdLastCandle: {sdLastCandle}");
+                if (sdLastCandle > 2)
+                {
+                    Debug.WriteLine($"ZR: {barLast.OpenTime.ToString()} smallsigma SD: {candlesStandardDeviation.sd.ToString()}  ---- mean: {candlesStandardDeviation.mean.ToString()} --- sdLastCandle: {sdLastCandle}");
+                }
 
                 double GetStandardDeviationIfLastCandle(Bar barLast, double standardDevaition, double mean)
                 {
                     var deltasHighLowLastCandle = Math.Abs(barLast.High - barLast.Low);
 
-                    var resp = (mean - deltasHighLowLastCandle) / standardDevaition;
+                    var resp = Math.Abs((mean - deltasHighLowLastCandle)) / standardDevaition;
 
                     return resp;
                 }
@@ -124,11 +128,17 @@ namespace cAlgo
                     return resp;
                 }
 
-                for (int i = 1; i <= numberOfCandles; i++)
+                foreach (var item in bars.TakeLast(numberOfCandles))
                 {
-                    var barTemp = bars.TakeLast(i + 1).First();
-                    resp.Add(Math.Abs(barTemp.High - barTemp.Low));
+                    resp.Add(Math.Abs(item.High - item.Low));
                 }
+
+                //for (int i = 1; i <= numberOfCandles; i++)
+                //{
+                //    //var barTemp = bars.TakeLast(i + 1).First();
+                //    var barTemp = bars.TakeLast(i).First();
+                //    resp.Add(Math.Abs(barTemp.High - barTemp.Low));
+                //}
 
                 return resp;
             }
