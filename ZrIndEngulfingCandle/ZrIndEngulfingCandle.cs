@@ -27,13 +27,38 @@ namespace cAlgo
             Print(Message);
         }
 
-        int standardDeviationSampleNumber = 15;
+        int standardDeviationSampleNumber = 25;
         double tollerancePercent = 0;
         double bodyPercentVsWick = 200;
-        double sdThreshold = 1.5;
+        double sdThreshold = 2.5;
+        bool logTrendlineCrossing = true;
         public override void Calculate(int index)
         {
             var bars = MarketData.GetBars(this.TimeFrame);
+
+
+            //Get trendline drawing on chart and check delta price distance from line
+            if (logTrendlineCrossing)
+            {
+                var equidistantChannels = Chart.FindAllObjects(ChartObjectType.EquidistantChannel);
+                foreach (var item in equidistantChannels)
+                {
+                    Debug.WriteLine($"item name {item.Comment} channel height: {((ChartEquidistantChannel)item).ChannelHeight}");
+                }
+
+                var trendLines = Chart.FindAllObjects(ChartObjectType.TrendLine);
+                foreach (ChartTrendLine item in trendLines)
+                {                   
+                    var barCourrent = bars.TakeLast(1).First();
+                    var respHigh = PriceDeltaFromLine(item.Y1, item.Y2, barCourrent.High, item.Time1, item.Time2, barCourrent.OpenTime);
+                    var respLow = PriceDeltaFromLine(item.Y1, item.Y2, barCourrent.Low, item.Time1, item.Time2, barCourrent.OpenTime);
+
+                    Debug.WriteLine($"Trendline name {item.Comment} channel delta high: {respHigh} low: {respLow}");
+                }
+            }
+
+
+
 
             if (bars.Count < 3)
                 return;
@@ -169,6 +194,20 @@ namespace cAlgo
             }
         }
 
+        private double? PriceDeltaFromLine(double priceY1, double priceY2, double priceNow, DateTime dt1, DateTime dt2, DateTime dtNow)
+        {
+            if (dtNow < dt1 && dt2 < dtNow)
+                return null;
 
+            //find angular coefficient m
+            var m = (priceY2 - priceY1) / (dt2.Ticks - dt1.Ticks);
+            var c = priceY1 - (m * dt1.Ticks);
+
+            double priceYOnLine = (m * dtNow.Ticks) + c;
+
+            double deltaDistance = priceNow - priceYOnLine;
+
+            return deltaDistance;
+        }
     }
 }
