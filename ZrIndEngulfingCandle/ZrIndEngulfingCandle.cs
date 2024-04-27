@@ -88,7 +88,8 @@ namespace cAlgo
 
 
             //Plot on indicator chart (candle SD value) 
-            if (sdLastCandle > sdThreshold)
+            //if (sdLastCandle > sdThreshold)
+            if (true)
             {
                 //case pre candle is red and last candle is green
                 if (barPreLast.Open > barPreLast.Close && barLast.Open < barLast.Close)
@@ -104,7 +105,7 @@ namespace cAlgo
 
                     double tolleranceInDecimal = tollerancePercent / 100;
                     //if (barLast.Close*(1+ tolleranceInDecimal) > barPreLast.Open && barLast.Open * (1 - tolleranceInDecimal) <= barPreLast.Close)
-                    if (Math.Abs(barLast.Open - barLast.Close) > Math.Abs(barPreLast.Open - barPreLast.Close))
+                    if (Math.Abs(barLast.Open - barLast.Close) > Math.Abs(barPreLast.Open - barPreLast.Close) && barPreLast.Low >= barLast.Low)
                     {
                         //candle is Engulfed by Buyers
                         var engulfingRation = Math.Abs(barLast.Open - barLast.Close) / Math.Abs(barPreLast.Open - barPreLast.Close);
@@ -113,10 +114,10 @@ namespace cAlgo
                     }
                 }
                 //case pre candle is green and last candle is red
-                else if (barPreLast.Open < barPreLast.Close && barLast.Open > barLast.Close)
+                else if (barPreLast.Open < barPreLast.Close && barLast.Open > barLast.Close )
                 {
                     double tolleranceInDecimal = tollerancePercent / 100;
-                    if (Math.Abs(barLast.Open - barLast.Close) > Math.Abs(barPreLast.Open - barPreLast.Close))
+                    if (Math.Abs(barLast.Open - barLast.Close) > Math.Abs(barPreLast.Open - barPreLast.Close) && (barPreLast.High <= barLast.High))
                     //if (barLast.Close * (1 - tolleranceInDecimal) < barPreLast.Open && barLast.Open * (1 + tolleranceInDecimal) >= barPreLast.Close)
                     {
                         //candle is Engulfed by Sellers
@@ -124,6 +125,11 @@ namespace cAlgo
                         Result[index - 1] = -sdLastCandle;
                         return;
                     }
+                }
+                else
+                {
+                    Result[index - 1] = 0;
+                    return;
                 }
             }
             else
